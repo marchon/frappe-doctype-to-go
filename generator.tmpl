@@ -24,6 +24,8 @@ type Link struct {
 
 type {{.TypeName}} struct {
   {{- range .TypeFields}}
-  {{.Name}} {{.Type}} {{.Decorator}}
+  {{- if .Generate }}
+  {{.Name}} {{.MappedType}} `json:"{{.JSONName}}"`
+  {{ -end }}
   {{- end}}
 }
