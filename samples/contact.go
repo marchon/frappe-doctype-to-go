@@ -1,9 +1,9 @@
 //
 // Auto-generated with frappe-doctype-to-go
 //
-package {{.PkgName}}
+package erpnext_api
 
-{{ if .WithLinkStruct }}
+
 // Link define a link to any DocType
 type Link struct {
   Creation    string `json:"creation,omitempty"`
@@ -20,11 +20,18 @@ type Link struct {
   Parentfield string `json:"parentfield,omitempty"`
   Parenttype  string `json:"parenttype,omitempty`
 }
-{{- end}}
 
-// {{.TypeName}} type
-type {{.TypeName}} struct {
-  {{- range .TypeFields}}
-  {{.Name}} {{.MappedType}} `json:"{{.JSONName}}{{ if (eq .Required 0)}},omitempty{{end}}"`
-  {{- end}}
+// Contact type
+type Contact struct {
+  FirstName string `json:"first_name"`
+  LastName string `json:"last_name,omitempty"`
+  EmailId string `json:"email_id,omitempty"`
+  Status string `json:"status,omitempty"`
+  Phone string `json:"phone,omitempty"`
+  MobileNo string `json:"mobile_no,omitempty"`
+  IsPrimaryContact bool `json:"is_primary_contact,omitempty"`
+  Department string `json:"department,omitempty"`
+  Designation string `json:"designation,omitempty"`
+  Unsubscribed bool `json:"unsubscribed,omitempty"`
+  Links []Link `json:"links,omitempty"`
 }
