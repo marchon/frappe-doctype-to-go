@@ -11,6 +11,8 @@ Generates go functions from a given Postman JSON collection as standard input.
 ```bash
 frappe-doctype-to-go <postman-collection-file.json >output.go -package=my-package-name -withlink=true
 ```
+* _package_ optional: the package name for the generated file
+* _withlink_ optional: indicates whether to include the Link structure as part of the output or not
 
 ## Docker
 Run the following shell command to build the docker image
