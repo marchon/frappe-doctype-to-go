@@ -1,4 +1,4 @@
-package doctype2go
+package main
 
 import (
 	"bytes"
