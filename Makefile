@@ -1,7 +1,7 @@
-frappe-doctype-to-go: generator.go
+frappe-doctype-to-go: main.go
 	go build
 
-test: generator.go
+test: main.go
 	go test
 
 docker:
