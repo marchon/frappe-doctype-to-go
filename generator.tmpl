@@ -24,6 +24,6 @@ type Link struct {
 
 type {{.TypeName}} struct {
   {{- range .TypeFields}}
-  {{.Name}} {{.MappedType}} `json:"{{.JSONName}}"`
+  {{.Name}} {{.MappedType}} `json:"{{.JSONName}}{{ if (eq .Required 0)}},omitempty{{end}}"`
   {{- end}}
 }

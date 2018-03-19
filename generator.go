@@ -2,8 +2,8 @@ package doctype2go
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
-	"os"
 	"strings"
 	tt "text/template"
 )
@@ -16,7 +16,7 @@ const (
 type docTypeField struct {
 	Type       string `json:"fieldtype"`
 	MappedType string
-	Required   bool   `json:"reqd"`
+	Required   int    `json:"reqd"`
 	JSONName   string `json:"fieldname"`
 }
 
@@ -34,8 +34,11 @@ func (d *docTypeField) Name() (s string) {
 }
 
 // Generate generate the GO structure file from doctype
-func Generate(in *os.File, out *os.File, pkgName string, withLinkStruct bool) (err error) {
-	t := getTemplate(in)
+func Generate(in io.Reader, out io.Writer, pkgName string, withLinkStruct bool) (err error) {
+	t, err := getTemplate(in)
+	if err != nil {
+		return
+	}
 
 	t.PkgName = pkgName
 	t.WithLinkStruct = withLinkStruct
@@ -46,7 +49,7 @@ func Generate(in *os.File, out *os.File, pkgName string, withLinkStruct bool) (e
 	return
 }
 
-func getTemplate(in *os.File) (t *template) {
+func getTemplate(in io.Reader) (t *template, err error) {
 	// data := map[string]interface{}{}
 	// dec := json.NewDecoder(in)
 	// if err = dec.Decode(&data); err != nil {
@@ -97,7 +100,7 @@ func mapTypeFields(tf []docTypeField) (r []docTypeField) {
 	return
 }
 
-func applyTemplate(templateName string, templatePath string, data *template, out *os.File) (err error) {
+func applyTemplate(templateName string, templatePath string, data *template, out io.Writer) (err error) {
 	t, err := tt.New(templateName).ParseFiles(templatePath)
 	if err != nil {
 		return
