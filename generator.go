@@ -5,6 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	tt "text/template"
+)
+
+const (
+	templateName = "generator.tmpl"
+	templatePath = "./generator.tmpl"
 )
 
 type docTypeField struct {
@@ -12,7 +18,6 @@ type docTypeField struct {
 	MappedType string
 	Required   bool   `json:"reqd"`
 	JSONName   string `json:"fieldname"`
-	Generate   bool
 }
 
 type template struct {
@@ -34,40 +39,14 @@ func Generate(in *os.File, out *os.File, pkgName string, withLinkStruct bool) (e
 
 	t.PkgName = pkgName
 	t.WithLinkStruct = withLinkStruct
-	hasLinks := false
-	typeMapping := map[string]string{
-		"Data":     "string",
-		"Select":   "string",
-		"Check":    "bool",
-		"Currency": "float32",
-		"Text":     "string",
-		"Float":    "float32",
-	}
+	t.TypeFields = mapTypeFields(t.TypeFields)
 
-	for _, field := range t.TypeFields {
-		field.MappedType = typeMapping[field.Type]
-		if len(field.MappedType) > 0 {
-			field.Generate = true
-		}
-
-		if !hasLinks && field.Type == "Link" {
-			hasLinks = true
-		}
-	}
-
-	if hasLinks {
-		link := docTypeField{
-			JSONName:   "links",
-			MappedType: "[]Link",
-			Generate:   true,
-		}
-		t.TypeFields = append(t.TypeFields, link)
-	}
+	err = applyTemplate(templateName, templatePath, t, out)
 
 	return
 }
 
-func getTemplate(in *os.File) (t* template) {
+func getTemplate(in *os.File) (t *template) {
 	// data := map[string]interface{}{}
 	// dec := json.NewDecoder(in)
 	// if err = dec.Decode(&data); err != nil {
@@ -82,5 +61,48 @@ func getTemplate(in *os.File) (t* template) {
 	// f, err := jq.String("fields")
 	// var fields []docTypeField
 	err = json.Unmarshal([]byte(raw), &t)
+	return
+}
+
+func mapTypeFields(tf []docTypeField) (r []docTypeField) {
+	hasLinks := false
+	typeMapping := map[string]string{
+		"Data":     "string",
+		"Select":   "string",
+		"Check":    "bool",
+		"Currency": "float32",
+		"Text":     "string",
+		"Float":    "float32",
+	}
+
+	for _, field := range tf {
+		field.MappedType = typeMapping[field.Type]
+
+		if !hasLinks && field.Type == "Link" {
+			hasLinks = true
+		}
+
+		if len(field.MappedType) > 0 {
+			r = append(r, field)
+		}
+	}
+
+	if hasLinks {
+		link := docTypeField{
+			JSONName:   "links",
+			MappedType: "[]Link",
+		}
+		r = append(r, link)
+	}
+	return
+}
+
+func applyTemplate(templateName string, templatePath string, data *template, out *os.File) (err error) {
+	t, err := tt.New(templateName).ParseFiles(templatePath)
+	if err != nil {
+		return
+	}
+
+	err = t.Execute(out, data)
 	return
 }
