@@ -46,17 +46,15 @@ type {{.TypeName}} struct {
 }
 
 // Validate run validation for mandatory fields
-func (d *{{.TypeName}}) Validate() (isValid bool, m map[string]string) {
-  isValid = true
-  {{ range .TypeFields}}
+func (d *{{.TypeName}}) Validate() (bool, string) {
+  {{- range .TypeFields}}
   {{- if eq .Required 1 }}
   {{- if eq .MappedType "string" }}
   if len(d.{{.Name}}) == 0 {
-    m["{{.Name}}"] = "Field '{{.Name}}' cannot be empty"
-    isValid = false
+    return false,  "Field '{{.Name}}' cannot be empty"
   }
   {{- end}}
   {{- end}}
   {{- end}}
-  return
+  return true, ""
 }
