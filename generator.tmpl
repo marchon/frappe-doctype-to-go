@@ -20,6 +20,22 @@ type Link struct {
   Parentfield string `json:"parentfield,omitempty"`
   Parenttype  string `json:"parenttype,omitempty`
 }
+
+// Validate run validation for mandatory fields
+func (d *Link) Validate() (isValid bool, m map[string]string) {
+  isValid = true
+
+  if len(d.LinkDoctype) == 0 {
+    m["LinkDoctype"] = "Field 'LinkDoctype' cannot be empty"
+    isValid = false
+  }
+
+  if len(d.LinkName) == 0 {
+    m["LinkName"] = "Field 'LinkName' cannot be empty"
+    isValid = false
+  }
+  return
+}
 {{- end}}
 
 // {{.TypeName}} type
@@ -27,4 +43,20 @@ type {{.TypeName}} struct {
   {{- range .TypeFields}}
   {{.Name}} {{.MappedType}} `json:"{{.JSONName}}{{ if (eq .Required 0)}},omitempty{{end}}"`
   {{- end}}
+}
+
+// Validate run validation for mandatory fields
+func (d *{{.TypeName}}) Validate() (isValid bool, m map[string]string) {
+  isValid = true
+  {{ range .TypeFields}}
+  {{- if eq .Required 1 }}
+  {{- if eq .MappedType "string" }}
+  if len(d.{{.Name}}) == 0 {
+    m["{{.Name}}"] = "Field '{{.Name}}' cannot be empty"
+    isValid = false
+  }
+  {{- end}}
+  {{- end}}
+  {{- end}}
+  return
 }
