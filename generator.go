@@ -72,7 +72,7 @@ func mapTypeFields(tf []docTypeField) (r []docTypeField) {
 	typeMapping := map[string]string{
 		"Data":     "string",
 		"Select":   "string",
-		"Check":    "bool",
+		"Check":    "int",
 		"Currency": "float32",
 		"Text":     "string",
 		"Float":    "float32",
