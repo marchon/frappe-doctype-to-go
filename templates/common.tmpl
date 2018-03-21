@@ -124,3 +124,12 @@ func makeRequest(r *httpRequest) (res *http.Response, err error) {
 
 	return res, checkForHTTPErrors(res)
 }
+
+func checkForHTTPErrors(res *http.Response) (err error) {
+	if res.StatusCode >= http.StatusBadRequest {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(res.Body)
+		return fmt.Errorf("%d - %s\n%s", res.StatusCode, res.Status, buf.String())
+	}
+	return
+}

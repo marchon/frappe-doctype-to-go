@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 )
 
 const (
@@ -12,6 +13,9 @@ const (
 )
 
 func main() {
+	// TODO: Replace this with a CLI library
+	// e.g. https://github.com/urfave/cli
+	//			https://github.com/spf13/cobra
 	defaultPkgName := "erpnext_api"
 	pkgName := flag.String("p", defaultPkgName, "package name")
 	output := flag.String("o", ".", "the outh path for common.go and link.go")
@@ -19,17 +23,15 @@ func main() {
 	includeLink := flag.Bool("l", false, "include the Link structure in the output")
 	flag.Parse()
 
-	fmt.Println(os.Stdout.Name())
-
 	if *includeCommon {
-		if out, err := os.Create(fmt.Sprintf("%s/%s", *output, commonOutputFileName)); err == nil {
+		if out, err := os.Create(path.Join(*output, commonOutputFileName)); err == nil {
 			if err := GenerateCommon(out, *pkgName); err != nil {
 				fmt.Printf("Error generating 'common.go' file:\n%s", err)
 			}
 		}
 	}
 	if *includeLink {
-		if out, err := os.Create(fmt.Sprintf("%s/%s", *output, linkTypeOutputFileName)); err == nil {
+		if out, err := os.Create(path.Join(*output, linkTypeOutputFileName)); err == nil {
 			if err := GenerateLinkType(out, *pkgName); err != nil {
 				fmt.Printf("Error generating 'link.go' file:\n%s", err)
 			}
