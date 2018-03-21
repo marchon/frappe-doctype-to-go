@@ -9,10 +9,12 @@ go get -v github.com/deidle/frappe-doctype-to-go
 ## Usage
 Generates go functions from a given Postman JSON collection as standard input.
 ```bash
-frappe-doctype-to-go <postman-collection-file.json >output.go -package=my-package-name -withlink=true
+frappe-doctype-to-go <postman-collection-file.json >output.go -o=./output -p=my-package-name -l -c
 ```
-* _package_ optional: the package name for the generated file
-* _withlink_ optional: indicates whether to include the Link structure as part of the output or not
+* _o_ optional: the output folder for link.go and commond.go
+* _p_ optional: the package name for the generated file
+* _c_ optional: indicates whether to generate the Common file in the output folder
+* _l_ optional: indicates whether to generate the Link structure in the output folder
 
 ## Docker
 Run the following shell command to build the docker image

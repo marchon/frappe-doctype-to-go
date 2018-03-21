@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 )
 
 const (
@@ -14,22 +13,23 @@ const (
 
 func main() {
 	defaultPkgName := "erpnext_api"
-	pkgName := flag.String("package", defaultPkgName, "package name")
-	includeCommon := flag.Bool("includeCommon", true, "include the Common file in the output")
-	includeLink := flag.Bool("includeLink", true, "include the Link structure in the output")
+	pkgName := flag.String("p", defaultPkgName, "package name")
+	output := flag.String("o", ".", "the outh path for common.go and link.go")
+	includeCommon := flag.Bool("c", false, "include the Common file in the output")
+	includeLink := flag.Bool("l", false, "include the Link structure in the output")
 	flag.Parse()
 
-	outPath, _ := filepath.Abs(filepath.Dir(os.Stdout.Name()))
+	fmt.Println(os.Stdout.Name())
 
 	if *includeCommon {
-		if out, err := os.Create(fmt.Sprintf("%s/%s", outPath, commonOutputFileName)); err == nil {
+		if out, err := os.Create(fmt.Sprintf("%s/%s", *output, commonOutputFileName)); err == nil {
 			if err := GenerateCommon(out, *pkgName); err != nil {
 				fmt.Printf("Error generating 'common.go' file:\n%s", err)
 			}
 		}
 	}
 	if *includeLink {
-		if out, err := os.Create(fmt.Sprintf("%s/%s", outPath, linkTypeOutputFileName)); err == nil {
+		if out, err := os.Create(fmt.Sprintf("%s/%s", *output, linkTypeOutputFileName)); err == nil {
 			if err := GenerateLinkType(out, *pkgName); err != nil {
 				fmt.Printf("Error generating 'link.go' file:\n%s", err)
 			}
