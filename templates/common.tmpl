@@ -4,11 +4,17 @@
 package {{.PkgName}}
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 )
 
 // Filter defines a filter type
-type Filter {
+type Filter struct {
   Key       string
   Operation string
   Value     string
@@ -30,21 +36,22 @@ type Session struct {
 // AuthRoundTripper used for http request middleware
 type AuthRoundTripper struct {
 	Proxied http.RoundTripper
-  Session Session
+  Session *Session
 }
 
 // httpRequest used for internal CRUD request
-type httpRequest {
-  Method      string,
-  URLEndpoint string,
-  URLData     *url.Values,
-  Body        interface{},
+type httpRequest struct {
+  Method      string
+  URLEndpoint string
+  URLData     *url.Values
+  Body        interface{}
   Session     *Session
 }
 
+// Retry authentication
 func (s *Session) Retry() (err error) {
   urlData := url.Values{}
-	urlData.Set("usr", s.Credentials.User)
+	urlData.Set("usr", s.Credentials.Username)
 	urlData.Set("pwd", s.Credentials.Password)
   authURL := fmt.Sprintf("%s/method/login", s.ApiURL)
 
@@ -64,7 +71,9 @@ func (s *Session) Retry() (err error) {
 	if err != nil {
 		return err
 	}
-	s.CookieJar.SetCookies(s.ApiURL, r.Cookies())
+
+	u, err := url.Parse(s.ApiURL)
+	s.CookieJar.SetCookies(u, r.Cookies())
 
 	return nil
 }
@@ -78,7 +87,7 @@ func (art AuthRoundTripper) RoundTrip(req *http.Request) (res *http.Response, e 
 	res, e = do()
 	if res.StatusCode == http.StatusForbidden {
 		if e = art.Session.Retry(); e == nil {
-			u, _ := url.Parse(s.ApiURL)
+			u, _ := url.Parse(art.Session.ApiURL)
 			newCookies := art.Session.CookieJar.Cookies(u)
 			req.Header.Del("Cookie")
 			for _, c := range newCookies {
