@@ -1,0 +1,75 @@
+//
+// Auto-generated with frappe-doctype-to-go
+//
+package {{.PkgName}}
+
+// {{.Name}} type
+type {{.Name}} struct {
+  Creation    string `json:"creation,omitempty"`
+  Docstatus   int    `json:"docstatus,omitempty"`
+  Doctype     string `json:"doctype,omitempty"`
+  Modified    string `json:"modified,omitempty"`
+  ModifiedBy  string `json:"modified_by,omitempty"`
+  Name        string `json:"name,omitempty"`
+  Owner       string `json:"owner,omitempty"`
+  {{- range .TypeFields}}
+  {{.Name}} {{.MappedType}} `json:"{{.JSONName}}{{ if (eq .Required 0)}},omitempty{{end}}"`
+  {{- end}}
+}
+
+// Validate run validation for mandatory fields
+func (d *{{.Name}}) Validate() (bool, string) {
+  {{- range .TypeFields}}
+  {{- if eq .Required 1 }}
+  {{- if eq .MappedType "string" }}
+  if len(d.{{.Name}}) == 0 {
+    return false,  "Field '{{.Name}}' cannot be empty"
+  }
+  {{- end}}
+  {{- end}}
+  {{- end}}
+  return true, ""
+}
+
+{{- $opsType := printf "%s%s" .Name "Ops"}}
+// $opsType Define operations for {{.Name}}
+type {{$opsType}}Ops struct {
+  Session *Session
+  Create(d *{{.Name}}) error
+  Delete(d *{{.Name}}) error
+  Update(d *{{.Name}}) error
+  Get(key string) ({{.Name}}, error)
+  Filter(filter Filter) ({{.Name}}, error)
+}
+
+// $opsType Define methods for {{.Name}}
+func New{{$opsType}}(Session *s) *{{$opsType}} {
+  return &{{$opsType}}{
+    Session: s
+  }
+}
+
+// Create creates a new {{.Name}} in ERPNext
+func ($opsType) Create(doc {{.Name}}) (err error) {
+
+}
+
+// Delete an existing {{.Name}} from ERPNext
+func ($opsType) Delete(doc {{.Name}}) (err error) {
+  
+}
+
+// Update an existing {{.Name}} in ERPNext
+func ($opsType) Update(doc {{.Name}}) (err error) {
+  
+}
+
+// Get an existing {{.Name}} from ERPNext
+func ($opsType) Get(key string) (doc {{.Name}}, err error) {
+  
+}
+
+// Get existing {{.Name}} based on a filter from ERPNext
+func ($opsType) Filter(filter Filter) (docs []{{.Name}}, err error)  {
+
+}

@@ -9,8 +9,12 @@ import (
 )
 
 const (
-	templateName = "generator.tmpl"
-	templatePath = "./generator.tmpl"
+	commonTemplateName   = "common.tmpl"
+	commonTemplatePath   = "./templates/common.tmpl"
+	docTypesTemplateName = "doctypes.tmpl"
+	docTypesTemplatePath = "./templates/doctypes.tmpl"
+	linkTypeTemplateName = "link.tmpl"
+	linkTypeTemplatePath = "./templates/link.tmpl"
 )
 
 type docTypeField struct {
@@ -20,11 +24,22 @@ type docTypeField struct {
 	JSONName   string `json:"fieldname"`
 }
 
-type template struct {
-	PkgName        string
-	WithLinkStruct bool
-	TypeName       string         `json:"name"`
-	TypeFields     []docTypeField `json:"fields"`
+type docTypeTemplate struct {
+	PkgName    string
+	TypeName   string         `json:"name"`
+	TypeFields []docTypeField `json:"fields"`
+}
+
+type commonTemplate struct {
+	PkgName string
+}
+
+type linkTypeTemplate struct {
+	PkgName string
+}
+
+func (d *docTypeTemplate) Name() string {
+	return strings.Replace(d.TypeName, " ", "", -1)
 }
 
 func (d *docTypeField) Name() (s string) {
@@ -33,36 +48,39 @@ func (d *docTypeField) Name() (s string) {
 	return strings.Replace(s, " ", "", -1)
 }
 
-// Generate generate the GO structure file from doctype
-func Generate(in io.Reader, out io.Writer, pkgName string, withLinkStruct bool) (err error) {
-	t, err := getTemplate(in)
+// GenerateCommon generate the GO structure file for common types
+func GenerateCommon(out io.Writer, pkgName string) (err error) {
+	t := &commonTemplate{pkgName}
+	err = applyTemplate(commonTemplateName, commonTemplatePath, t, out)
+	return
+}
+
+// GenerateLinkType generate the GO structure file from Link doctype
+func GenerateLinkType(out io.Writer, pkgName string) (err error) {
+	t := &linkTypeTemplate{pkgName}
+	err = applyTemplate(linkTypeTemplateName, linkTypeTemplatePath, t, out)
+	return
+}
+
+// GenerateDocTypes generate the GO structure file from doctype
+func GenerateDocTypes(in io.Reader, out io.Writer, pkgName string) (err error) {
+	t, err := getDocTypeTemplate(in)
 	if err != nil {
 		return
 	}
 
 	t.PkgName = pkgName
-	t.WithLinkStruct = withLinkStruct
 	t.TypeFields = mapTypeFields(t.TypeFields)
-
-	err = applyTemplate(templateName, templatePath, t, out)
+	err = applyTemplate(docTypesTemplateName, docTypesTemplatePath, t, out)
 
 	return
 }
 
-func getTemplate(in io.Reader) (t *template, err error) {
-	// data := map[string]interface{}{}
-	// dec := json.NewDecoder(in)
-	// if err = dec.Decode(&data); err != nil {
-	// 	return
-	// }
+func getDocTypeTemplate(in io.Reader) (t *docTypeTemplate, err error) {
 	raw, err := ioutil.ReadAll(in)
 	if err != nil {
 		return
 	}
-
-	// jq := jsonq.NewQuery(data)
-	// f, err := jq.String("fields")
-	// var fields []docTypeField
 	err = json.Unmarshal([]byte(raw), &t)
 	return
 }
@@ -100,12 +118,12 @@ func mapTypeFields(tf []docTypeField) (r []docTypeField) {
 	return
 }
 
-func applyTemplate(templateName string, templatePath string, data *template, out io.Writer) (err error) {
-	t, err := tt.New(templateName).ParseFiles(templatePath)
+func applyTemplate(name string, path string, template interface{}, out io.Writer) (err error) {
+	t, err := tt.New(name).ParseFiles(path)
 	if err != nil {
 		return
 	}
 
-	err = t.Execute(out, data)
+	err = t.Execute(out, template)
 	return
 }
