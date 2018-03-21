@@ -55,7 +55,7 @@ func New{{$opsType}}(s *Session) *{{$opsType}} {
 }
 
 // Create creates a new {{.Name}} in ERPNext
-func (c *{{$opsType}}) Create(doc {{.Name}}) (err error) {
+func (c *{{$opsType}}) Create(doc *{{.Name}}) (err error) {
   if isValid, msg := doc.Validate(); !isValid {
 		return errors.New(msg)
 	}
@@ -95,7 +95,7 @@ func (c *{{$opsType}}) Delete(key string) (err error) {
 }
 
 // Update an existing {{.Name}} in ERPNext
-func (c *{{$opsType}}) Update(doc {{.Name}}) (err error) {
+func (c *{{$opsType}}) Update(doc *{{.Name}}) (err error) {
   if isValid, msg := doc.Validate(); !isValid {
 		return errors.New(msg)
 	}
@@ -140,7 +140,7 @@ func (c *{{$opsType}}) Get(key string) (doc {{.Name}}, err error) {
 }
 
 // Filter retrieves {{.Name}} based on a filter from ERPNext
-func (c *{{$opsType}}) Filter(filter Filter) (docs []{{.Name}}, err error)  {
+func (c *{{$opsType}}) Filter(filter *Filter) (docs []{{.Name}}, err error)  {
   f := fmt.Sprintf(`[["%s", "%s", "%s", "%s"]]`, filter.DocType, filter.Key, filter.Operation, filter.Value)
 	u := fmt.Sprintf("%s/resource/%s?filters=%s", c.Session.ApiURL, filter.DocType, url.QueryEscape(f))
 	req := &httpRequest{
