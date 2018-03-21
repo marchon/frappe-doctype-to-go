@@ -19,8 +19,7 @@ func main() {
 	includeLink := flag.Bool("includeLink", true, "include the Link structure in the output")
 	flag.Parse()
 
-	name := "/Users/fabrizio.lallai/Code/go/src/github.com/deidle/frappe-doctype-to-go/samples/customer2.go"
-	outPath, _ := filepath.Abs(filepath.Dir(name /*os.Stdout.Name()*/))
+	outPath, _ := filepath.Abs(filepath.Dir(os.Stdout.Name()))
 
 	if *includeCommon {
 		if out, err := os.Create(fmt.Sprintf("%s/%s", outPath, commonOutputFileName)); err == nil {
