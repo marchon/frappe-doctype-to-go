@@ -3,6 +3,17 @@
 //
 package {{.PkgName}}
 
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+
+	"github.com/jmoiron/jsonq"
+)
+
 // {{.Name}} type
 type {{.Name}} struct {
   Creation    string `json:"creation,omitempty"`
@@ -15,6 +26,11 @@ type {{.Name}} struct {
   {{- range .TypeFields}}
   {{.Name}} {{.MappedType}} `json:"{{.JSONName}}{{ if (eq .Required 0)}},omitempty{{end}}"`
   {{- end}}
+}
+{{$opsType := printf "%s%s" .Name "Ops"}}
+// {{$opsType}} Define operations for {{.Name}}
+type {{$opsType}} struct {
+  Session *Session
 }
 
 // Validate run validation for mandatory fields
@@ -30,13 +46,8 @@ func (d *{{.Name}}) Validate() (bool, string) {
   {{- end}}
   return true, ""
 }
-{{$opsType := printf "%s%s" .Name "Ops"}}
-// {{$opsType}} Define operations for {{.Name}}
-type {{$opsType}} struct {
-  Session *Session
-}
 
-// $opsType Define methods for {{.Name}}
+// New{{$opsType}} Define methods for {{.Name}}
 func New{{$opsType}}(s *Session) *{{$opsType}} {
   return &{{$opsType}}{
     Session: s,
@@ -44,26 +55,126 @@ func New{{$opsType}}(s *Session) *{{$opsType}} {
 }
 
 // Create creates a new {{.Name}} in ERPNext
-func (*{{$opsType}}) Create(doc {{.Name}}) (err error) {
-  return
+func (c *{{$opsType}}) Create(doc {{.Name}}) (err error) {
+  if isValid, msg := doc.Validate(); !isValid {
+		return errors.New(msg)
+	}
+
+	u := fmt.Sprintf("%s/resource/{{.Name}}", c.Session.ApiURL)
+  req := &httpRequest{
+		Method:      http.MethodPost,
+		URLEndpoint: u,
+    Body:        doc,
+		Session:     c.Session,
+	}
+
+	res, err := makeRequest(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+	return
 }
 
 // Delete an existing {{.Name}} from ERPNext
-func (*{{$opsType}}) Delete(doc {{.Name}}) (err error) {
-  return
+func (c *{{$opsType}}) Delete(key string) (err error) {
+	u := fmt.Sprintf("%s/resource/{{.Name}}/%s", c.Session.ApiURL, key)
+  req := &httpRequest{
+		Method:      http.MethodDelete,
+		URLEndpoint: u,
+	}
+
+  res, err := makeRequest(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+	return
 }
 
 // Update an existing {{.Name}} in ERPNext
-func (*{{$opsType}}) Update(doc {{.Name}}) (err error) {
-  return
+func (c *{{$opsType}}) Update(doc {{.Name}}) (err error) {
+  if isValid, msg := doc.Validate(); !isValid {
+		return errors.New(msg)
+	}
+
+	u := fmt.Sprintf("%s/resource/{{.Name}}", c.Session.ApiURL)
+  req := &httpRequest{
+		Method:      http.MethodPut,
+		URLEndpoint: u,
+    Body:        doc,
+		Session:     c.Session,
+	}
+
+	res, err := makeRequest(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+	return
 }
 
 // Get an existing {{.Name}} from ERPNext
-func (*{{$opsType}}) Get(key string) (doc {{.Name}}, err error) {
-  return
+func (c *{{$opsType}}) Get(key string) (doc {{.Name}}, err error) {
+  u := fmt.Sprintf("%s/resource/{{.Name}}/%s", c.Session.ApiURL, key)
+	req := &httpRequest{
+		Method:      http.MethodGet,
+		URLEndpoint: u,
+		Session:     c.Session,
+	}
+  
+	res, err := makeRequest(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+	if docType, err := getDocType(res.Body); err == nil {
+		err = json.Unmarshal(docType, &doc)
+	}
+
+	return
 }
 
 // Filter retrieves {{.Name}} based on a filter from ERPNext
-func (*{{$opsType}}) Filter(filter Filter) (docs []{{.Name}}, err error)  {
+func (c *{{$opsType}}) Filter(filter Filter) (docs []{{.Name}}, err error)  {
+  f := fmt.Sprintf(`[["%s", "%s", "%s", "%s"]]`, filter.DocType, filter.Key, filter.Operation, filter.Value)
+	u := fmt.Sprintf("%s/resource/%s?filters=%s", c.Session.ApiURL, filter.DocType, url.QueryEscape(f))
+	req := &httpRequest{
+		Method:      http.MethodGet,
+		URLEndpoint: u,
+		Session:     c.Session,
+	}
+  
+	res, err := makeRequest(req)
+	if err != nil {
+		return
+	}
+
+	defer res.Body.Close()
+
+	data := map[string]interface{}{}
+	dec := json.NewDecoder(res.Body)
+	if e := dec.Decode(&data); e == io.EOF {
+		return
+	}
+
+	jq := jsonq.NewQuery(data)
+	results, err := jq.ArrayOfObjects("data")
+	if err != nil {
+		return
+	}
+
+	// Retrieve docs details for each
+	for _, result := range results {
+		key := result["name"].(string)
+		if doc, err := c.Get(key); err == nil {
+			docs = append(docs, doc)
+		}
+	}
+
   return
 }

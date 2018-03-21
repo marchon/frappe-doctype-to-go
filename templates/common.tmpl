@@ -11,10 +11,13 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+
+	"github.com/jmoiron/jsonq"
 )
 
 // Filter defines a filter type
 type Filter struct {
+	DocType   string
   Key       string
   Operation string
   Value     string
@@ -48,8 +51,9 @@ type httpRequest struct {
   Session     *Session
 }
 
-// Retry authentication
-func (s *Session) Retry() (err error) {
+// Initialize authentication
+func (s *Session) Init() (err error) {
+
   urlData := url.Values{}
 	urlData.Set("usr", s.Credentials.Username)
 	urlData.Set("pwd", s.Credentials.Password)
@@ -76,6 +80,11 @@ func (s *Session) Retry() (err error) {
 	s.CookieJar.SetCookies(u, r.Cookies())
 
 	return nil
+}
+
+// Retry authentication
+func (s *Session) Retry() (err error) {
+	return s.Init()
 }
 
 // RoundTrip middleware to handle authentication retries
@@ -140,5 +149,21 @@ func checkForHTTPErrors(res *http.Response) (err error) {
 		buf.ReadFrom(res.Body)
 		return fmt.Errorf("%d - %s\n%s", res.StatusCode, res.Status, buf.String())
 	}
+	return
+}
+
+func getDocType(body io.Reader) (docType []byte, err error) {
+	data := map[string]interface{}{}
+	dec := json.NewDecoder(body)
+	dec.Decode(&data)
+
+	jq := jsonq.NewQuery(data)
+	obj, err := jq.Object("data")
+
+	buf := new(bytes.Buffer)
+	enc := json.NewEncoder(buf)
+	enc.Encode(obj)
+
+	docType = buf.Bytes()
 	return
 }
