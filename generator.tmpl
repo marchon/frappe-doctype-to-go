@@ -47,6 +47,13 @@ type {{.TypeName}} struct {
 
 // Validate run validation for mandatory fields
 func (d *{{.TypeName}}) Validate() (bool, string) {
+  Creation    string `json:"creation,omitempty"`
+  Docstatus   int    `json:"docstatus,omitempty"`
+  Doctype     string `json:"doctype,omitempty"`
+  Modified    string `json:"modified,omitempty"`
+  ModifiedBy  string `json:"modified_by,omitempty"`
+  Name        string `json:"name,omitempty"`
+  Owner       string `json:"owner,omitempty"`
   {{- range .TypeFields}}
   {{- if eq .Required 1 }}
   {{- if eq .MappedType "string" }}
