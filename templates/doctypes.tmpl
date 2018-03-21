@@ -30,16 +30,10 @@ func (d *{{.Name}}) Validate() (bool, string) {
   {{- end}}
   return true, ""
 }
-
-{{- $opsType := printf "%s%s" .Name "Ops"}}
-// $opsType Define operations for {{.Name}}
-type {{$opsType}}Ops struct {
+{{$opsType := printf "%s%s" .Name "Ops"}}
+// {{$opsType}} Define operations for {{.Name}}
+type {{$opsType}} struct {
   Session *Session
-  Create(d *{{.Name}}) error
-  Delete(d *{{.Name}}) error
-  Update(d *{{.Name}}) error
-  Get(key string) ({{.Name}}, error)
-  Filter(filter Filter) ({{.Name}}, error)
 }
 
 // $opsType Define methods for {{.Name}}
@@ -50,26 +44,26 @@ func New{{$opsType}}(Session *s) *{{$opsType}} {
 }
 
 // Create creates a new {{.Name}} in ERPNext
-func ($opsType) Create(doc {{.Name}}) (err error) {
-
+func ({{$opsType}}) Create(doc {{.Name}}) (err error) {
+  return
 }
 
 // Delete an existing {{.Name}} from ERPNext
-func ($opsType) Delete(doc {{.Name}}) (err error) {
-  
+func ({{$opsType}}) Delete(doc {{.Name}}) (err error) {
+  return
 }
 
 // Update an existing {{.Name}} in ERPNext
-func ($opsType) Update(doc {{.Name}}) (err error) {
-  
+func ({{$opsType}}) Update(doc {{.Name}}) (err error) {
+  return
 }
 
 // Get an existing {{.Name}} from ERPNext
-func ($opsType) Get(key string) (doc {{.Name}}, err error) {
-  
+func ({{$opsType}}) Get(key string) (doc {{.Name}}, err error) {
+  return
 }
 
 // Get existing {{.Name}} based on a filter from ERPNext
-func ($opsType) Filter(filter Filter) (docs []{{.Name}}, err error)  {
-
+func ({{$opsType}}) Filter(filter Filter) (docs []{{.Name}}, err error)  {
+  return
 }
