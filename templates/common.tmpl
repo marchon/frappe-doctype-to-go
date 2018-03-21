@@ -51,9 +51,8 @@ type httpRequest struct {
   Session     *Session
 }
 
-// Initialize authentication
-func (s *Session) Init() (err error) {
-
+// Begin initialize authentication
+func (s *Session) Begin() (err error) {
   urlData := url.Values{}
 	urlData.Set("usr", s.Credentials.Username)
 	urlData.Set("pwd", s.Credentials.Password)
@@ -82,9 +81,15 @@ func (s *Session) Init() (err error) {
 	return nil
 }
 
+// End current session
+func (s *Session) End() (err error) {
+	s.CookieJar, err = cookiejar.New(nil)
+	return
+}
+
 // Retry authentication
 func (s *Session) Retry() (err error) {
-	return s.Init()
+	return s.Begin()
 }
 
 // RoundTrip middleware to handle authentication retries
