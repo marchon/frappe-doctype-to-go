@@ -102,7 +102,27 @@ func (s *Session) Begin() (err error) {
 
 // End current session
 func (s *Session) End() (err error) {
+	authURL := fmt.Sprintf("%s/method/logout", s.ApiURL)
+
+	// Post form
+	r, err := http.PostForm(authURL, nil)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+
 	s.CookieJar, err = cookiejar.New(nil)
+	if err != nil {
+		return err
+	}
+
+	url, err := url.Parse(authURL)
+	if err != nil {
+		return err
+	}
+
+	u, err := url.Parse(s.ApiURL)
+	s.CookieJar.SetCookies(u, r.Cookies())
 	return
 }
 
