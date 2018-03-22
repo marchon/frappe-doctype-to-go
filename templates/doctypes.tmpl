@@ -33,6 +33,19 @@ type {{$opsType}} struct {
   Session *Session
 }
 
+var (
+	// {{.Name}}Keys for {{.Name}}
+	{{.Name}}Keys = struct {
+		{{- range .TypeFields}}
+		{{.Name}} string
+		{{- end}}
+	}{
+		{{- range .TypeFields}}
+		"{{.JSONName}}",
+		{{- end}}
+	}
+)
+
 // Validate run validation for mandatory fields
 func (d *{{.Name}}) Validate() (bool, string) {
   {{- range .TypeFields}}

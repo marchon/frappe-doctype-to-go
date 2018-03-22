@@ -51,6 +51,25 @@ type httpRequest struct {
   Session     *Session
 }
 
+var (
+	// Operations use for filtering
+	Operations = struct {
+		Equal        string
+		NotEqual     string
+		Greater      string
+		Lower        string
+		GreaterEqual string
+		LowerEqual   string
+	}{
+		"=",
+		"!=",
+		">",
+		"<",
+		">=",
+		"<=",
+	}
+)
+
 // Begin initialize authentication
 func (s *Session) Begin() (err error) {
   urlData := url.Values{}
