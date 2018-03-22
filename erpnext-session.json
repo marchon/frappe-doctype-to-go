@@ -1,0 +1,47 @@
+{
+    "__meta__": {
+        "about": "HTTPie session file",
+        "help": "https://httpie.org/docs#sessions",
+        "httpie": "0.9.9"
+    },
+    "auth": {
+        "password": null,
+        "type": null,
+        "username": null
+    },
+    "cookies": {
+        "full_name": {
+            "expires": null,
+            "path": "/",
+            "secure": false,
+            "value": "Fabrizio%20%20Lallai"
+        },
+        "sid": {
+            "expires": 1521944323,
+            "path": "/",
+            "secure": false,
+            "value": "028a7aab18fdef4720b78b9dbe49e6f7ec211b0311f316e7584b5e4b"
+        },
+        "system_user": {
+            "expires": null,
+            "path": "/",
+            "secure": false,
+            "value": "yes"
+        },
+        "user_id": {
+            "expires": null,
+            "path": "/",
+            "secure": false,
+            "value": "fabrizio.lallai%40deidle.com"
+        },
+        "user_image": {
+            "expires": null,
+            "path": "/",
+            "secure": false,
+            "value": ""
+        }
+    },
+    "headers": {
+        "Accept": "application/json, */*"
+    }
+}

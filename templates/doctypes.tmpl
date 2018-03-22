@@ -87,6 +87,11 @@ func (c *{{$opsType}}) Create(doc *{{.Name}}) (err error) {
 	}
 
 	defer res.Body.Close()
+
+	if docType, err := getDocType(res.Body); err == nil {
+		err = json.Unmarshal(docType, &doc)
+	}
+
 	return
 }
 
